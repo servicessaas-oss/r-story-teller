@@ -12,8 +12,7 @@ import {
   XCircle,
   AlertTriangle
 } from "lucide-react";
-import { useLocalEnvelopes } from "@/hooks/useLocalEnvelopes";
-import { useState as useStateReact, useEffect } from "react";
+import { useOptimizedUserEnvelopes } from "@/hooks/useOptimizedUserEnvelopes";
 import { EnhancedWorkflowProgressCard } from "./EnhancedWorkflowProgressCard";
 import { SequentialWorkflowTracker } from "./SequentialWorkflowTracker";
 
@@ -22,26 +21,8 @@ interface WorkflowProgressDashboardProps {
 }
 
 export function WorkflowProgressDashboard({ onCompose }: WorkflowProgressDashboardProps) {
-  const { getUserEnvelopes } = useLocalEnvelopes();
-  const [envelopes, setEnvelopes] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { envelopes, loading } = useOptimizedUserEnvelopes();
   const [selectedEnvelope, setSelectedEnvelope] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadEnvelopes = async () => {
-      setLoading(true);
-      try {
-        const userEnvelopes = await getUserEnvelopes();
-        setEnvelopes(userEnvelopes);
-      } catch (error) {
-        console.error('Error loading envelopes:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadEnvelopes();
-  }, [getUserEnvelopes]);
 
   const activeEnvelopes = envelopes.filter(envelope => 
     envelope.workflow_status !== 'completed' && 

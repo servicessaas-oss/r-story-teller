@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { PrimesayLogo } from "./PrimesayLogo";
 import { AccountDropdown } from "./AccountDropdown";
-import { useLocalAuth } from "@/contexts/LocalAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useLegalEntityEnvelopes } from "@/hooks/useLegalEntityEnvelopes";
 
 import { LegalEntityDashboard } from "./LegalEntityDashboard";
@@ -109,7 +109,7 @@ function LegalEntitySidebar({
 }
 
 export function LegalEntityPlatform() {
-  const { user, profile, signOut } = useLocalAuth();
+  const { user, profile, signOut } = useAuth();
   const { getWorkloadStats } = useLegalEntityEnvelopes();
   const [currentSection, setCurrentSection] = useState<LegalEntitySection>('dashboard');
   const [selectedEnvelope, setSelectedEnvelope] = useState<PendingEnvelope | null>(null);
@@ -194,7 +194,7 @@ export function LegalEntityPlatform() {
   };
 
 
-  const isLegalEntity = profile?.role === 'legal_entity';
+  const isLegalEntity = profile?.role === 'legal_entity' || (user?.user_metadata?.role === 'legal_entity');
 
   if (!isLegalEntity) {
     return (

@@ -17,7 +17,7 @@ import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { SentConfirmation } from "@/components/SentConfirmation";
 
 import { ActiveWorkflowsDashboard } from "@/components/ActiveWorkflowsDashboard";
-import { useLocalEnvelopes } from "@/hooks/useLocalEnvelopes";
+import { useUserEnvelopes } from "@/hooks/useUserEnvelopes";
 import { NavigationProvider, useNavigation } from "@/contexts/NavigationContext";
 import { useKeyboardShortcuts, createAppShortcuts } from "@/hooks/useKeyboardShortcuts";
 
@@ -64,25 +64,7 @@ const sectionLabels: Record<string, string> = {
 function PrimesayCargoInner({ onSignOut }: { onSignOut?: () => void }) {
   const [appState, setAppState] = useState<AppState>('dashboard');
   const [currentSection, setCurrentSection] = useState('dashboard');
-  const { getUserEnvelopes } = useLocalEnvelopes();
-  const [dbEnvelopes, setDbEnvelopes] = useState<any[]>([]);
-  const [envelopesLoading, setEnvelopesLoading] = useState(false);
-  
-  useEffect(() => {
-    const loadEnvelopes = async () => {
-      setEnvelopesLoading(true);
-      try {
-        const envelopes = await getUserEnvelopes();
-        setDbEnvelopes(envelopes);
-      } catch (error) {
-        console.error('Error loading envelopes:', error);
-      } finally {
-        setEnvelopesLoading(false);
-      }
-    };
-    
-    loadEnvelopes();
-  }, [getUserEnvelopes]);
+  const { envelopes: dbEnvelopes, loading: envelopesLoading } = useUserEnvelopes();
   const [envelopeData, setEnvelopeData] = useState<{
     files: UploadedFile[];
     acidNumber: string;
