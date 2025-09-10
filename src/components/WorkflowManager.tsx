@@ -14,7 +14,6 @@ interface WorkflowEnvelope {
   acid_number: string;
   status: string;
   workflow_status: string;
-  current_stage: number;
   workflow_stages: any;
   next_legal_entity_id: string | null;
   created_at: string;
@@ -159,7 +158,7 @@ export function WorkflowManager({ envelopeId, onWorkflowUpdate }: WorkflowManage
                       <span className="font-medium">ACID: {envelope.acid_number}</span>
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Stage {envelope.current_stage} - Current: {getLegalEntityName(envelope.legal_entity_id)}
+                      Current: {getLegalEntityName(envelope.legal_entity_id)}
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant="outline" className="text-xs">

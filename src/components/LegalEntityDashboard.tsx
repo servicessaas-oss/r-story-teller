@@ -38,7 +38,7 @@ export function LegalEntityDashboard({
   const completionRate = totalDocuments > 0 ? Math.round(((stats.approved + stats.rejected) / totalDocuments) * 100) : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-h-screen overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -181,7 +181,7 @@ export function LegalEntityDashboard({
           <CardTitle>Recent Activity</CardTitle>
           <CardDescription>Latest document processing activities</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="max-h-64 overflow-y-auto">
           <div className="space-y-3">
             {[
               { action: "Approved", acid: "AC12345", time: "2 minutes ago", type: "Certificate of Origin" },

@@ -84,19 +84,10 @@ Deno.serve(async (req) => {
       throw new Error('Failed to fetch user profile');
     }
 
-    // If user already has a wallet, return existing info
+    // If user already has a wallet, we need to regenerate since we don't store private keys
     if (profile.blockchain_address && profile.blockchain_public_key) {
-      return new Response(
-        JSON.stringify({
-          address: profile.blockchain_address,
-          publicKey: profile.blockchain_public_key,
-          message: 'Using existing wallet'
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        }
-      );
+      console.log('User has existing wallet, generating new one since private key not stored');
+      // Continue to generate new wallet since we don't store private keys in DB
     }
 
     // Generate new wallet

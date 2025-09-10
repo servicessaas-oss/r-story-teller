@@ -123,7 +123,6 @@ export function SequentialWorkflowComposer() {
           legal_entity_id: mapLegalEntityIdToUUID(workflowPreview.stages[0]?.legal_entity_id) || '',
           files: uploadedFiles.map(f => ({ name: f.name, type: f.type })),
           workflow_stages: workflowPreview.stages,
-          current_stage: 1,
           workflow_status: 'draft',
           status: 'draft'
         })

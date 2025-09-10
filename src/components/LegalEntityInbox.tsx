@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -73,7 +73,7 @@ export function LegalEntityInbox({ onSelectEnvelope }: LegalEntityInboxProps) {
     statusFilter 
   });
 
-  const fetchEnvelopes = async () => {
+  const fetchEnvelopes = useCallback(async () => {
     console.log('📨 LegalEntityInbox: fetchEnvelopes called');
     try {
       setLoading(true);
@@ -86,7 +86,7 @@ export function LegalEntityInbox({ onSelectEnvelope }: LegalEntityInboxProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getAssignedEnvelopes]);
 
   useEffect(() => {
     fetchEnvelopes();
@@ -95,20 +95,21 @@ export function LegalEntityInbox({ onSelectEnvelope }: LegalEntityInboxProps) {
     const interval = setInterval(fetchEnvelopes, 30000); // Refresh every 30 seconds
     
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchEnvelopes]);
 
   const handleApproveDocument = async (envelopeId: string) => {
     try {
       // First get the envelope to find the current stage
       const { data: envelope, error: fetchError } = await supabase
         .from('envelopes')
-        .select('current_stage, workflow_stages')
+        .select('workflow_stages')
         .eq('id', envelopeId)
         .single();
 
       if (fetchError) throw fetchError;
 
-      const currentStage = envelope.current_stage || 1;
+      const stages = (envelope.workflow_stages as any[]) || [];
+      const currentStage = stages.find(s => s.is_current)?.stage_number || 1;
       
       // Use sequential workflow to complete the current stage
       if (user) {
@@ -132,13 +133,14 @@ export function LegalEntityInbox({ onSelectEnvelope }: LegalEntityInboxProps) {
       // First get the envelope to find the current stage
       const { data: envelope, error: fetchError } = await supabase
         .from('envelopes')
-        .select('current_stage, workflow_stages')
+        .select('workflow_stages')
         .eq('id', envelopeId)
         .single();
 
       if (fetchError) throw fetchError;
 
-      const currentStage = envelope.current_stage || 1;
+      const stages = (envelope.workflow_stages as any[]) || [];
+      const currentStage = stages.find(s => s.is_current)?.stage_number || 1;
       
       // Use sequential workflow to reject the current stage
       if (user) {

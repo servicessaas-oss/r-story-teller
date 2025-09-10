@@ -25,7 +25,6 @@ export interface WorkflowStage {
 export interface SequentialWorkflowData {
   envelope_id: string;
   acid_number: string;
-  current_stage: number;
   total_stages: number;
   workflow_status: string;
   stages: WorkflowStage[];
@@ -70,7 +69,6 @@ export const useSequentialWorkflow = () => {
     return {
       envelope_id: envelopeId,
       acid_number: acidNumber,
-      current_stage: 1,
       total_stages: stages.length,
       workflow_status: 'draft',
       stages,
@@ -92,7 +90,6 @@ export const useSequentialWorkflow = () => {
         .from('envelopes')
         .update({
           workflow_stages: workflowData.stages as any,
-          current_stage: 1,
           legal_entity_id: firstStage.legal_entity_id,
           workflow_status: 'in_progress',
           status: 'sent'
@@ -122,7 +119,7 @@ export const useSequentialWorkflow = () => {
     }
   }, [user, toast]);
 
-  // Process payment for current stage
+  // Process payment for current stage and auto-approve if legal entity has approved
   const processStagePayment = useCallback(async (
     envelopeId: string,
     stageNumber: number,
@@ -141,14 +138,16 @@ export const useSequentialWorkflow = () => {
       const currentStages = envelope.workflow_stages as any as WorkflowStage[];
       if (!currentStages) throw new Error("No workflow stages found");
 
-      // Update current stage payment status
+      // Update current stage payment status and mark as completed (auto-approve after payment)
       const updatedStages = currentStages.map(stage => {
         if (stage.stage_number === stageNumber) {
           return {
             ...stage,
-            status: 'payment_completed' as const,
+            status: 'completed' as const,
             payment_status: 'completed' as const,
-            payment_completed_at: new Date().toISOString()
+            payment_completed_at: new Date().toISOString(),
+            completed_at: new Date().toISOString(),
+            is_current: false
           };
         }
         return stage;
@@ -172,9 +171,13 @@ export const useSequentialWorkflow = () => {
       }
 
       const currentStageName = currentStages.find(s => s.stage_number === stageNumber)?.legal_entity_name;
+      const nextStageName = nextStage?.legal_entity_name;
+
       toast({
-        title: "Payment Completed",
-        description: `Payment for ${currentStageName} completed. Document can now be processed.`,
+        title: "Payment Completed & Stage Approved",
+        description: nextStageName 
+          ? `${currentStageName} completed. Now processing with ${nextStageName}`
+          : `All stages completed! Workflow finished.`,
       });
 
       return data;
@@ -216,6 +219,7 @@ export const useSequentialWorkflow = () => {
       const updatedStages = currentStages.map(stage => {
         if (stage.stage_number === stageNumber) {
           // Complete current stage
+          // Complete current stage
           return {
             ...stage,
             status: 'completed' as const,
@@ -248,7 +252,7 @@ export const useSequentialWorkflow = () => {
           workflow_stages: JSON.parse(JSON.stringify(updatedStages)),
           current_stage: stageNumber + 1,
           legal_entity_id: nextStage.legal_entity_id,
-          status: 'pending_review'
+          status: nextStage.payment_required ? 'pending_payment' : 'pending_review'
         };
       } else {
         // Workflow completed
@@ -280,9 +284,9 @@ export const useSequentialWorkflow = () => {
       const nextStageName = nextStage?.legal_entity_name;
 
       toast({
-        title: "Stage Completed",
+        title: "Stage Approved & Advanced",
         description: nextStageName 
-          ? `${currentStageName} completed. Now sending to ${nextStageName}`
+          ? `${currentStageName} approved. Envelope sent to ${nextStageName} ${nextStage.payment_required ? 'for payment' : 'for review'}`
           : `All stages completed! Workflow finished.`,
       });
 

@@ -198,16 +198,22 @@ export function SequentialWorkflowTracker({ envelopeId, onStageComplete }: Seque
   };
 
   const canUserActOnStage = (stage: WorkflowStage) => {
+    // Find if this stage should be active based on previous stages completion
+    const previousStageCompleted = stage.stage_number === 1 || 
+      workflowData?.stages.find(s => s.stage_number === stage.stage_number - 1)?.status === 'completed';
+    
     return profile?.role === 'legal_entity' && 
            profile.legal_entity_id === stage.legal_entity_id &&
-           stage.is_current && 
-           stage.can_start &&
-           (stage.status === 'pending' || stage.status === 'in_progress' || stage.status === 'payment_completed');
+           previousStageCompleted &&
+           (stage.status === 'pending' || stage.status === 'in_progress');
   };
 
   const canUserPayForStage = (stage: WorkflowStage) => {
-    return stage.is_current && 
-           stage.can_start &&
+    // Find if this stage should be active based on previous stages completion
+    const previousStageCompleted = stage.stage_number === 1 || 
+      workflowData?.stages.find(s => s.stage_number === stage.stage_number - 1)?.status === 'completed';
+    
+    return previousStageCompleted &&
            stage.status === 'payment_required' &&
            stage.payment_required;
   };
@@ -235,7 +241,7 @@ export function SequentialWorkflowTracker({ envelopeId, onStageComplete }: Seque
             <div>
               <CardTitle className="text-primary">Sequential Workflow Progress</CardTitle>
               <CardDescription>
-                ACID: {workflowData.acid_number} • Stage {workflowData.current_stage} of {workflowData.total_stages}
+                ACID: {workflowData.acid_number} • Stage {currentStageNumber} of {workflowData.total_stages}
               </CardDescription>
             </div>
             <Badge variant={workflowData.workflow_status === 'completed' ? 'default' : 'secondary'}>
@@ -265,17 +271,22 @@ export function SequentialWorkflowTracker({ envelopeId, onStageComplete }: Seque
         {workflowData.stages.map((stage, index) => {
           const isCurrentUserStage = canUserActOnStage(stage);
           
+          // Determine if this stage is currently active based on previous stages
+          const previousStageCompleted = stage.stage_number === 1 || 
+            workflowData.stages.find(s => s.stage_number === stage.stage_number - 1)?.status === 'completed';
+          const isStageActive = previousStageCompleted && stage.status !== 'completed' && stage.status !== 'rejected';
+          
           return (
             <Card 
               key={stage.stage_number}
               className={`transition-all ${
-                stage.is_current 
+                isStageActive 
                   ? 'ring-2 ring-primary border-primary bg-primary/5' 
                   : stage.status === 'completed'
                   ? 'bg-green-50 border-green-200'
                   : stage.status === 'rejected'
                   ? 'bg-red-50 border-red-200'
-                  : stage.status === 'blocked'
+                  : !previousStageCompleted
                   ? 'bg-muted/50 border-muted'
                   : ''
               }`}
@@ -306,7 +317,7 @@ export function SequentialWorkflowTracker({ envelopeId, onStageComplete }: Seque
                         </div>
                       </div>
 
-                      {stage.status === 'blocked' && (
+                      {!previousStageCompleted && stage.stage_number > 1 && (
                         <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
                           <Lock className="h-3 w-3" />
                           Waiting for previous stage to complete
@@ -366,7 +377,7 @@ export function SequentialWorkflowTracker({ envelopeId, onStageComplete }: Seque
                     </div>
                   )}
 
-                  {isCurrentUserStage && stage.status !== 'rejected' && stage.status !== 'payment_required' && (
+                  {isCurrentUserStage && stage.status !== 'rejected' && stage.status !== 'payment_required' && stage.status !== 'payment_completed' && stage.status !== 'completed' && (
                     <div className="flex gap-2 ml-4">
                       <Button
                         size="sm"

@@ -182,7 +182,7 @@ export function Dashboard({ onCompose, onNavigate, currentSection, envelopes, on
             </div>
           </header>
 
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-6 overflow-y-auto">
             <QuickActionsBar
               onNewEnvelope={onCompose}
               onStartChat={handleStartChat}
@@ -194,7 +194,7 @@ export function Dashboard({ onCompose, onNavigate, currentSection, envelopes, on
             />
 
             {children ? (
-              <div className="h-full">
+              <div className="h-full overflow-y-auto">
                 {children}
               </div>
             ) : currentSection === "dashboard" ? (
