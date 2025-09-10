@@ -154,16 +154,22 @@ export const useSequentialWorkflow = () => {
         return stage;
       });
 
+      console.log('Processing payment - updating stages:', updatedStages);
+      
       const { data, error } = await supabase
         .from('envelopes')
         .update({
-          workflow_stages: updatedStages as any
+          workflow_stages: JSON.parse(JSON.stringify(updatedStages))
         })
         .eq('id', envelopeId)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Payment stage update error:', error);
+        console.error('Failed stages:', updatedStages);
+        throw error;
+      }
 
       const currentStageName = currentStages.find(s => s.stage_number === stageNumber)?.legal_entity_name;
       toast({
@@ -206,14 +212,24 @@ export const useSequentialWorkflow = () => {
       const currentStages = envelope.workflow_stages as any as WorkflowStage[];
       if (!currentStages) throw new Error("No workflow stages found");
 
-      // Update current stage to completed
+      // Update current stage to completed and prepare next stage
       const updatedStages = currentStages.map(stage => {
         if (stage.stage_number === stageNumber) {
+          // Complete current stage
           return {
             ...stage,
             status: 'completed' as const,
             completed_at: new Date().toISOString(),
             is_current: false
+          };
+        } else if (stage.stage_number === stageNumber + 1) {
+          // Enable next stage
+          return {
+            ...stage,
+            status: stage.payment_required ? 'payment_required' : 'pending',
+            can_start: true,
+            is_current: true,
+            assigned_at: new Date().toISOString()
           };
         }
         return stage;
@@ -222,24 +238,14 @@ export const useSequentialWorkflow = () => {
       // Check if there's a next stage
       const nextStage = updatedStages.find(stage => stage.stage_number === stageNumber + 1);
       let envelopeUpdates: any = {
-        workflow_stages: updatedStages,
+        workflow_stages: JSON.parse(JSON.stringify(updatedStages)),
         current_stage: stageNumber
       };
 
       if (nextStage) {
-        // Enable next stage - check if payment is required
-        updatedStages.forEach(stage => {
-          if (stage.stage_number === stageNumber + 1) {
-            stage.status = stage.payment_required ? 'payment_required' : 'pending';
-            stage.can_start = true;
-            stage.is_current = true;
-            stage.assigned_at = new Date().toISOString();
-          }
-        });
-
         envelopeUpdates = {
           ...envelopeUpdates,
-          workflow_stages: updatedStages as any,
+          workflow_stages: JSON.parse(JSON.stringify(updatedStages)),
           current_stage: stageNumber + 1,
           legal_entity_id: nextStage.legal_entity_id,
           status: 'pending_review'
@@ -248,12 +254,15 @@ export const useSequentialWorkflow = () => {
         // Workflow completed
         envelopeUpdates = {
           ...envelopeUpdates,
-          workflow_stages: updatedStages as any,
+          workflow_stages: JSON.parse(JSON.stringify(updatedStages)),
           workflow_status: 'completed',
           status: 'approved'
         };
       }
 
+      console.log('Updating envelope with:', envelopeUpdates);
+      console.log('Updated stages:', updatedStages);
+      
       const { data, error } = await supabase
         .from('envelopes')
         .update(envelopeUpdates)
@@ -261,7 +270,11 @@ export const useSequentialWorkflow = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Envelope update error:', error);
+        console.error('Failed update payload:', envelopeUpdates);
+        throw error;
+      }
 
       const currentStageName = currentStages.find(s => s.stage_number === stageNumber)?.legal_entity_name;
       const nextStageName = nextStage?.legal_entity_name;
@@ -373,14 +386,50 @@ export const useSequentialWorkflow = () => {
 
       const stages = (envelope.workflow_stages as any as WorkflowStage[]) || [];
       
+      // Determine actual current stage based on stage statuses
+      let actualCurrentStage = 1;
+      let updatedStages = stages;
+      
+      // Find the actual current stage based on status
+      for (let i = 0; i < stages.length; i++) {
+        const stage = stages[i];
+        
+        // If we find a pending/in_progress stage after completed ones, that's our current
+        if (stage.status === 'pending' || stage.status === 'in_progress') {
+          actualCurrentStage = stage.stage_number;
+          
+          // Update the stages to reflect the correct current stage
+          updatedStages = stages.map(s => ({
+            ...s,
+            is_current: s.stage_number === actualCurrentStage,
+            can_start: s.stage_number === actualCurrentStage || 
+                      (s.stage_number < actualCurrentStage && s.status === 'completed')
+          }));
+          break;
+        }
+        
+        // If stage is payment_completed, we should be on the next stage
+        if (stage.status === 'payment_completed' && i < stages.length - 1) {
+          actualCurrentStage = stage.stage_number + 1;
+          
+          // Update stages to reflect we should be on next stage
+          updatedStages = stages.map(s => ({
+            ...s,
+            is_current: s.stage_number === actualCurrentStage,
+            can_start: s.stage_number === actualCurrentStage || s.stage_number < actualCurrentStage,
+            status: s.stage_number === actualCurrentStage && s.status === 'blocked' ? 'pending' : s.status
+          }));
+        }
+      }
+      
       return {
         envelope_id: envelopeId,
         acid_number: envelope.acid_number,
-        current_stage: envelope.current_stage || 1,
+        current_stage: actualCurrentStage,
         total_stages: stages.length,
         workflow_status: envelope.workflow_status as string || 'not_started',
-        stages,
-        can_proceed: stages.some(stage => stage.is_current && stage.can_start)
+        stages: updatedStages,
+        can_proceed: updatedStages.some(stage => stage.is_current && stage.can_start)
       };
     } catch (error) {
       console.error('Error getting workflow status:', error);
