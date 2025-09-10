@@ -46,6 +46,13 @@ export function LocalAuthProvider({ children }: { children: React.ReactNode }) {
     // Initialize default users
     localAuth.initializeDefaultUsers();
     
+    // Auto-sign in the default user for demo purposes
+    localAuth.signInWithNotification('user@example.com', 'password').then(({ session }) => {
+      if (session) {
+        console.log('🔐 Auto-signed in default user');
+      }
+    });
+    
     // Check for existing session first
     localAuth.getSession().then((session) => {
       console.log('🔐 getSession result:', !!session, 'User:', session?.user?.email);

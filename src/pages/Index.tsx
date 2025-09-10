@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useLocalAuth } from "@/contexts/LocalAuthContext";
 import { AuthPageWithPlatform } from "@/components/AuthPageWithPlatform";
 import { LegalEntityPlatform } from "@/components/LegalEntityPlatform";
 import { WorldClock } from "@/components/WorldClock";
@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 import PrimesayCargo from "./PrimesayCargo";
 
 function IndexInner() {
-  const { user, profile, loading, signOut } = useAuth();
+  const { user, profile, loading, signOut } = useLocalAuth();
   const [selectedPlatform, setSelectedPlatform] = useState<'user' | 'legal_entity'>('user');
   const [showAdminSetup, setShowAdminSetup] = useState(false);
-  const isLegalEntity = profile?.role === 'legal_entity' || (user?.user_metadata?.role === 'legal_entity');
+  const isLegalEntity = profile?.role === 'legal_entity';
 
   if (loading) {
     return (
