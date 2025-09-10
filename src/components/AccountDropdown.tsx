@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,10 @@ export function AccountDropdown({
     .toUpperCase()
     .slice(0, 2);
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -60,7 +64,7 @@ export function AccountDropdown({
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-80 bg-popover border-border z-[60]" align="end" forceMount>
+      <DropdownMenuContent className="w-80 bg-popover border-border z-[60]" align="end">
         <DropdownMenuLabel className="font-normal p-4">
           <div className="flex items-center gap-3">
             <Avatar className="h-12 w-12">
