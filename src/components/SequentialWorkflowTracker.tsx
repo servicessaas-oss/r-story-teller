@@ -74,11 +74,15 @@ export function SequentialWorkflowTracker({ envelopeId, onStageComplete }: Seque
       });
 
       // Update the stage status locally and reload workflow
-      await processStagePayment(envelopeId, stage.stage_number, {
+      console.log('Before processStagePayment - Stage:', stage.stage_number);
+      const result = await processStagePayment(envelopeId, stage.stage_number, {
         payment_method: 'test_payment',
         amount: stage.payment_amount,
         status: 'completed'
       });
+      console.log('processStagePayment result:', result);
+      
+      // Reload workflow status to see changes
       await loadWorkflowStatus();
       onStageComplete?.();
       
@@ -166,7 +170,7 @@ export function SequentialWorkflowTracker({ envelopeId, onStageComplete }: Seque
            profile.legal_entity_id === stage.legal_entity_id &&
            stage.is_current && 
            stage.can_start &&
-           (stage.status === 'pending' || stage.status === 'in_progress' || stage.status === 'payment_completed');
+           (stage.status === 'pending' || stage.status === 'in_progress');
   };
 
   const canUserPayForStage = (stage: WorkflowStage) => {
@@ -328,7 +332,7 @@ export function SequentialWorkflowTracker({ envelopeId, onStageComplete }: Seque
                     </div>
                   )}
 
-                  {isCurrentUserStage && stage.status !== 'rejected' && stage.status !== 'payment_required' && (
+                  {isCurrentUserStage && stage.status !== 'rejected' && stage.status !== 'payment_required' && stage.status !== 'payment_completed' && stage.status !== 'completed' && (
                     <div className="flex gap-2 ml-4">
                       <Button
                         size="sm"
