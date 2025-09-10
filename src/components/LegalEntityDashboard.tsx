@@ -181,7 +181,7 @@ export function LegalEntityDashboard({
           <CardTitle>Recent Activity</CardTitle>
           <CardDescription>Latest document processing activities</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="max-h-64 overflow-y-auto">
           <div className="space-y-3">
             {[
               { action: "Approved", acid: "AC12345", time: "2 minutes ago", type: "Certificate of Origin" },
