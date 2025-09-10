@@ -223,7 +223,7 @@ export const useSequentialWorkflow = () => {
       const nextStage = updatedStages.find(stage => stage.stage_number === stageNumber + 1);
       let envelopeUpdates: any = {
         workflow_stages: updatedStages,
-        current_stage: stageNumber
+        current_stage: stageNumber + 1
       };
 
       if (nextStage) {
