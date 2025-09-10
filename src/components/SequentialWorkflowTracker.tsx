@@ -241,7 +241,7 @@ export function SequentialWorkflowTracker({ envelopeId, onStageComplete }: Seque
             <div>
               <CardTitle className="text-primary">Sequential Workflow Progress</CardTitle>
               <CardDescription>
-                ACID: {workflowData.acid_number} • Stage {currentStageNumber} of {workflowData.total_stages}
+                ACID: {workflowData.acid_number} • Stage {workflowData.stages.find(s => s.is_current)?.stage_number || 1} of {workflowData.total_stages}
               </CardDescription>
             </div>
             <Badge variant={workflowData.workflow_status === 'completed' ? 'default' : 'secondary'}>
