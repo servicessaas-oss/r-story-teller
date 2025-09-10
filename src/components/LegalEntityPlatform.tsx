@@ -314,7 +314,7 @@ export function LegalEntityPlatform() {
             </div>
           </header>
 
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-6 overflow-y-auto">
             {renderContent()}
           </div>
         </main>
