@@ -60,7 +60,7 @@ export function AccountDropdown({
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-80 bg-popover/95 backdrop-blur-sm border-border" align="end" forceMount>
+      <DropdownMenuContent className="w-80 bg-popover border-border z-[60]" align="end" forceMount>
         <DropdownMenuLabel className="font-normal p-4">
           <div className="flex items-center gap-3">
             <Avatar className="h-12 w-12">

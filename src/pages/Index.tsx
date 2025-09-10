@@ -88,9 +88,7 @@ function IndexInner() {
 
 const Index = () => {
   return (
-    <AuthProvider>
-      <IndexInner />
-    </AuthProvider>
+    <IndexInner />
   );
 };
 
