@@ -238,18 +238,20 @@ export function WorkflowProgressDashboard({ onCompose }: WorkflowProgressDashboa
       {/* Workflow Detail Dialog */}
       {selectedEnvelope && (
         <Dialog open={!!selectedEnvelope} onOpenChange={() => setSelectedEnvelope(null)}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[80vh]">
             <DialogHeader>
               <DialogTitle>
                 Workflow Details - ACID: {envelopes.find(e => e.id === selectedEnvelope)?.acid_number}
               </DialogTitle>
             </DialogHeader>
-            <SequentialWorkflowTracker 
-              envelopeId={selectedEnvelope} 
-              onStageComplete={() => {
-                // Refresh will happen automatically via real-time subscription
-              }}
-            />
+            <div className="overflow-y-auto max-h-[60vh]">
+              <SequentialWorkflowTracker 
+                envelopeId={selectedEnvelope} 
+                onStageComplete={() => {
+                  // Refresh will happen automatically via real-time subscription
+                }}
+              />
+            </div>
           </DialogContent>
         </Dialog>
       )}
