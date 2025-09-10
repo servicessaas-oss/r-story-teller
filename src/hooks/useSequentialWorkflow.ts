@@ -122,7 +122,7 @@ export const useSequentialWorkflow = () => {
     }
   }, [user, toast]);
 
-  // Process payment for current stage
+  // Process payment for current stage and auto-approve if legal entity has approved
   const processStagePayment = useCallback(async (
     envelopeId: string,
     stageNumber: number,
@@ -141,24 +141,59 @@ export const useSequentialWorkflow = () => {
       const currentStages = envelope.workflow_stages as any as WorkflowStage[];
       if (!currentStages) throw new Error("No workflow stages found");
 
-      // Update current stage payment status
+      // Update current stage payment status and mark as completed (auto-approve after payment)
       const updatedStages = currentStages.map(stage => {
         if (stage.stage_number === stageNumber) {
           return {
             ...stage,
-            status: 'payment_completed' as const,
+            status: 'completed' as const,
             payment_status: 'completed' as const,
-            payment_completed_at: new Date().toISOString()
+            payment_completed_at: new Date().toISOString(),
+            completed_at: new Date().toISOString(),
+            is_current: false
           };
         }
         return stage;
       });
 
+      // Check if there's a next stage
+      const nextStage = updatedStages.find(stage => stage.stage_number === stageNumber + 1);
+      let envelopeUpdates: any = {
+        workflow_stages: updatedStages,
+        current_stage: stageNumber + 1
+      };
+
+      if (nextStage) {
+        // Enable next stage - check if payment is required
+        updatedStages.forEach(stage => {
+          if (stage.stage_number === stageNumber + 1) {
+            stage.status = stage.payment_required ? 'payment_required' : 'pending';
+            stage.can_start = true;
+            stage.is_current = true;
+            stage.assigned_at = new Date().toISOString();
+          }
+        });
+
+        envelopeUpdates = {
+          ...envelopeUpdates,
+          workflow_stages: updatedStages as any,
+          current_stage: stageNumber + 1,
+          legal_entity_id: nextStage.legal_entity_id,
+          status: 'pending_review'
+        };
+      } else {
+        // Workflow completed
+        envelopeUpdates = {
+          ...envelopeUpdates,
+          workflow_stages: updatedStages as any,
+          workflow_status: 'completed',
+          status: 'approved'
+        };
+      }
+
       const { data, error } = await supabase
         .from('envelopes')
-        .update({
-          workflow_stages: updatedStages as any
-        })
+        .update(envelopeUpdates)
         .eq('id', envelopeId)
         .select()
         .single();
@@ -166,9 +201,13 @@ export const useSequentialWorkflow = () => {
       if (error) throw error;
 
       const currentStageName = currentStages.find(s => s.stage_number === stageNumber)?.legal_entity_name;
+      const nextStageName = nextStage?.legal_entity_name;
+
       toast({
-        title: "Payment Completed",
-        description: `Payment for ${currentStageName} completed. Document can now be processed.`,
+        title: "Payment Completed & Stage Approved",
+        description: nextStageName 
+          ? `${currentStageName} completed. Now processing with ${nextStageName}`
+          : `All stages completed! Workflow finished.`,
       });
 
       return data;
