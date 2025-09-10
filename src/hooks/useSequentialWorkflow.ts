@@ -158,11 +158,9 @@ export const useSequentialWorkflow = () => {
 
       // Check if there's a next stage
       const nextStage = updatedStages.find(stage => stage.stage_number === stageNumber + 1);
-      let envelopeUpdates: any = {
-        workflow_stages: updatedStages,
-        current_stage: stageNumber + 1
-      };
-
+      
+      let envelopeUpdates: any;
+      
       if (nextStage) {
         // Enable next stage - check if payment is required
         updatedStages.forEach(stage => {
@@ -175,7 +173,6 @@ export const useSequentialWorkflow = () => {
         });
 
         envelopeUpdates = {
-          ...envelopeUpdates,
           workflow_stages: updatedStages as any,
           current_stage: stageNumber + 1,
           legal_entity_id: nextStage.legal_entity_id,
@@ -184,8 +181,8 @@ export const useSequentialWorkflow = () => {
       } else {
         // Workflow completed
         envelopeUpdates = {
-          ...envelopeUpdates,
           workflow_stages: updatedStages as any,
+          current_stage: stageNumber + 1,
           workflow_status: 'completed',
           status: 'approved'
         };
