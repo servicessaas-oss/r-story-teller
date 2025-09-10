@@ -194,7 +194,7 @@ export function Dashboard({ onCompose, onNavigate, currentSection, envelopes, on
             />
 
             {children ? (
-              <div className="h-full overflow-y-auto">
+              <div className="h-full">
                 {children}
               </div>
             ) : currentSection === "dashboard" ? (

@@ -24,7 +24,7 @@ function IndexInner() {
   // If user is authenticated, show appropriate platform based on their role
   if (user) {
     return (
-      <div className="relative">
+      <div className="h-screen overflow-hidden">
         {isLegalEntity ? (
           <>
             <LegalEntityPlatform />
