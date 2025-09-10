@@ -237,14 +237,24 @@ export const useSequentialWorkflow = () => {
       const currentStages = envelope.workflow_stages as any as WorkflowStage[];
       if (!currentStages) throw new Error("No workflow stages found");
 
-      // Update current stage to completed
+      // Update current stage to completed and activate next stage
       const updatedStages = currentStages.map(stage => {
         if (stage.stage_number === stageNumber) {
+          // Complete current stage
           return {
             ...stage,
             status: 'completed' as const,
             completed_at: new Date().toISOString(),
             is_current: false
+          };
+        } else if (stage.stage_number === stageNumber + 1) {
+          // Activate next stage - set appropriate status based on payment requirement
+          return {
+            ...stage,
+            status: stage.payment_required ? 'payment_required' : 'pending',
+            can_start: true,
+            is_current: true,
+            assigned_at: new Date().toISOString()
           };
         }
         return stage;
@@ -252,31 +262,18 @@ export const useSequentialWorkflow = () => {
 
       // Check if there's a next stage
       const nextStage = updatedStages.find(stage => stage.stage_number === stageNumber + 1);
-      let envelopeUpdates: any = {
-        workflow_stages: updatedStages
-      };
+      let envelopeUpdates: any;
 
       if (nextStage) {
-        // Enable next stage - check if payment is required
-        updatedStages.forEach(stage => {
-          if (stage.stage_number === stageNumber + 1) {
-            stage.status = stage.payment_required ? 'payment_required' : 'pending';
-            stage.can_start = true;
-            stage.is_current = true;
-            stage.assigned_at = new Date().toISOString();
-          }
-        });
-
+        // Move to next stage
         envelopeUpdates = {
-          ...envelopeUpdates,
           workflow_stages: updatedStages as any,
           legal_entity_id: nextStage.legal_entity_id,
-          status: 'pending_review'
+          status: nextStage.payment_required ? 'pending_payment' : 'pending_review'
         };
       } else {
         // Workflow completed
         envelopeUpdates = {
-          ...envelopeUpdates,
           workflow_stages: updatedStages as any,
           workflow_status: 'completed',
           status: 'approved'
@@ -296,9 +293,9 @@ export const useSequentialWorkflow = () => {
       const nextStageName = nextStage?.legal_entity_name;
 
       toast({
-        title: "Stage Completed",
+        title: "Stage Approved & Advanced",
         description: nextStageName 
-          ? `${currentStageName} completed. Now sending to ${nextStageName}`
+          ? `${currentStageName} approved. Envelope sent to ${nextStageName} ${nextStage.payment_required ? 'for payment' : 'for review'}`
           : `All stages completed! Workflow finished.`,
       });
 
