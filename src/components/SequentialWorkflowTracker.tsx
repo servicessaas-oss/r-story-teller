@@ -190,7 +190,9 @@ export function SequentialWorkflowTracker({ envelopeId, onStageComplete }: Seque
     );
   }
 
-  const progress = (workflowData.current_stage / workflowData.total_stages) * 100;
+  // Calculate current stage based on completed stages + 1
+  const currentStageNumber = workflowData.stages.filter(s => s.status === 'completed').length + 1;
+  const progress = (currentStageNumber / workflowData.total_stages) * 100;
   const completedStages = workflowData.stages.filter(s => s.status === 'completed').length;
 
   return (
@@ -201,7 +203,7 @@ export function SequentialWorkflowTracker({ envelopeId, onStageComplete }: Seque
             <div>
               <CardTitle className="text-primary">Sequential Workflow Progress</CardTitle>
               <CardDescription>
-                ACID: {workflowData.acid_number} • Stage {workflowData.current_stage} of {workflowData.total_stages}
+                ACID: {workflowData.acid_number} • Stage {currentStageNumber} of {workflowData.total_stages}
               </CardDescription>
             </div>
             <Badge variant={workflowData.workflow_status === 'completed' ? 'default' : 'secondary'}>

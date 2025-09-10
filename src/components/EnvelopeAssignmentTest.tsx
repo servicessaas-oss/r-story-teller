@@ -41,10 +41,10 @@ export function EnvelopeAssignmentTest() {
           {
             stage: 1,
             legal_entity_id: legalEntityId,
-            required_actions: ["verify", "approve"]
+            required_actions: ["verify", "approve"],
+            is_current: true
           }
-        ],
-        current_stage: 1
+        ]
       });
 
       // Send envelope to trigger assignment

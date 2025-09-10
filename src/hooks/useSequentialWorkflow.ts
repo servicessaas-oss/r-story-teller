@@ -25,7 +25,6 @@ export interface WorkflowStage {
 export interface SequentialWorkflowData {
   envelope_id: string;
   acid_number: string;
-  current_stage: number;
   total_stages: number;
   workflow_status: string;
   stages: WorkflowStage[];
@@ -70,7 +69,6 @@ export const useSequentialWorkflow = () => {
     return {
       envelope_id: envelopeId,
       acid_number: acidNumber,
-      current_stage: 1,
       total_stages: stages.length,
       workflow_status: 'draft',
       stages,
@@ -92,7 +90,6 @@ export const useSequentialWorkflow = () => {
         .from('envelopes')
         .update({
           workflow_stages: workflowData.stages as any,
-          current_stage: 1,
           legal_entity_id: firstStage.legal_entity_id,
           workflow_status: 'in_progress',
           status: 'sent'
@@ -174,7 +171,6 @@ export const useSequentialWorkflow = () => {
 
         envelopeUpdates = {
           workflow_stages: updatedStages as any,
-          current_stage: stageNumber + 1,
           legal_entity_id: nextStage.legal_entity_id,
           status: 'pending_review'
         };
@@ -182,7 +178,6 @@ export const useSequentialWorkflow = () => {
         // Workflow completed
         envelopeUpdates = {
           workflow_stages: updatedStages as any,
-          current_stage: stageNumber + 1,
           workflow_status: 'completed',
           status: 'approved'
         };
@@ -258,8 +253,7 @@ export const useSequentialWorkflow = () => {
       // Check if there's a next stage
       const nextStage = updatedStages.find(stage => stage.stage_number === stageNumber + 1);
       let envelopeUpdates: any = {
-        workflow_stages: updatedStages,
-        current_stage: stageNumber + 1
+        workflow_stages: updatedStages
       };
 
       if (nextStage) {
@@ -276,7 +270,6 @@ export const useSequentialWorkflow = () => {
         envelopeUpdates = {
           ...envelopeUpdates,
           workflow_stages: updatedStages as any,
-          current_stage: stageNumber + 1,
           legal_entity_id: nextStage.legal_entity_id,
           status: 'pending_review'
         };
@@ -412,7 +405,6 @@ export const useSequentialWorkflow = () => {
       return {
         envelope_id: envelopeId,
         acid_number: envelope.acid_number,
-        current_stage: envelope.current_stage || 1,
         total_stages: stages.length,
         workflow_status: envelope.workflow_status as string || 'not_started',
         stages,

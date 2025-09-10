@@ -102,13 +102,14 @@ export function LegalEntityInbox({ onSelectEnvelope }: LegalEntityInboxProps) {
       // First get the envelope to find the current stage
       const { data: envelope, error: fetchError } = await supabase
         .from('envelopes')
-        .select('current_stage, workflow_stages')
+        .select('workflow_stages')
         .eq('id', envelopeId)
         .single();
 
       if (fetchError) throw fetchError;
 
-      const currentStage = envelope.current_stage || 1;
+      const stages = (envelope.workflow_stages as any[]) || [];
+      const currentStage = stages.find(s => s.is_current)?.stage_number || 1;
       
       // Use sequential workflow to complete the current stage
       if (user) {
@@ -132,13 +133,14 @@ export function LegalEntityInbox({ onSelectEnvelope }: LegalEntityInboxProps) {
       // First get the envelope to find the current stage
       const { data: envelope, error: fetchError } = await supabase
         .from('envelopes')
-        .select('current_stage, workflow_stages')
+        .select('workflow_stages')
         .eq('id', envelopeId)
         .single();
 
       if (fetchError) throw fetchError;
 
-      const currentStage = envelope.current_stage || 1;
+      const stages = (envelope.workflow_stages as any[]) || [];
+      const currentStage = stages.find(s => s.is_current)?.stage_number || 1;
       
       // Use sequential workflow to reject the current stage
       if (user) {

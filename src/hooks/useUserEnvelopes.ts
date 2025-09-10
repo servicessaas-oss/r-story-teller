@@ -10,7 +10,6 @@ export interface UserEnvelope {
   workflow_status: string;
   files: any[];
   legal_entity_id: string;
-  current_stage: number;
   workflow_stages: any[];
   created_at: string;
   updated_at: string;
@@ -49,7 +48,6 @@ export const useUserEnvelopes = () => {
         workflow_status: envelope.workflow_status,
         files: Array.isArray(envelope.files) ? envelope.files : [],
         legal_entity_id: envelope.legal_entity_id,
-        current_stage: envelope.current_stage || 1,
         workflow_stages: Array.isArray(envelope.workflow_stages) ? envelope.workflow_stages : [],
         created_at: envelope.created_at,
         updated_at: envelope.updated_at,

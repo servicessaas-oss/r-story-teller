@@ -161,7 +161,6 @@ export function EnhancedComposeWorkflow({ onSave, onComplete, onCancel }: Enhanc
         payment_method: 'credit_card',
         total_amount: workflowData.totalFees,
         workflow_stages: [],
-        current_stage: 1,
         status: 'draft' // Keep as draft until workflow is started
       };
 

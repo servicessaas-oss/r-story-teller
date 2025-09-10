@@ -10,7 +10,6 @@ export interface EnvelopeData {
   payment_method?: string;
   total_amount?: number;
   workflow_stages?: any[];
-  current_stage?: number;
 }
 
 export const useEnvelopes = () => {
@@ -30,7 +29,6 @@ export const useEnvelopes = () => {
         payment_method: envelopeData.payment_method,
         total_amount: envelopeData.total_amount,
         workflow_stages: envelopeData.workflow_stages || [],
-        current_stage: envelopeData.current_stage || 1,
         status: 'pending',
         payment_status: 'pending',
         workflow_status: 'in_progress',
