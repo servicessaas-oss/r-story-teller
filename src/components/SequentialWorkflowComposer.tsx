@@ -169,7 +169,7 @@ export function SequentialWorkflowComposer() {
   const totalFees = requiredDocuments.reduce((sum, doc) => sum + (doc.fee || 0), 0);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 overflow-y-auto max-h-screen">
       {/* Progress Steps */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center space-x-4">
