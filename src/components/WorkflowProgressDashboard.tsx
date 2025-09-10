@@ -174,14 +174,14 @@ export function WorkflowProgressDashboard({ onCompose }: WorkflowProgressDashboa
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="active" className="space-y-4 mt-6">
+              <TabsContent value="active" className="mt-6 max-h-[400px] overflow-y-auto">
                 {activeEnvelopes.length === 0 ? (
                   <div className="text-center py-8">
                     <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                     <p className="text-muted-foreground">No active workflows</p>
                   </div>
                 ) : (
-                  <div className="grid gap-4">
+                  <div className="grid gap-4 pr-2">
                     {activeEnvelopes.map((envelope) => (
                       <EnhancedWorkflowProgressCard 
                         key={envelope.id} 
@@ -193,14 +193,14 @@ export function WorkflowProgressDashboard({ onCompose }: WorkflowProgressDashboa
                 )}
               </TabsContent>
 
-              <TabsContent value="completed" className="space-y-4 mt-6">
+              <TabsContent value="completed" className="mt-6 max-h-[400px] overflow-y-auto">
                 {completedEnvelopes.length === 0 ? (
                   <div className="text-center py-8">
                     <CheckCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                     <p className="text-muted-foreground">No completed workflows yet</p>
                   </div>
                 ) : (
-                  <div className="grid gap-4">
+                  <div className="grid gap-4 pr-2">
                     {completedEnvelopes.map((envelope) => (
                       <EnhancedWorkflowProgressCard 
                         key={envelope.id} 
@@ -212,14 +212,14 @@ export function WorkflowProgressDashboard({ onCompose }: WorkflowProgressDashboa
                 )}
               </TabsContent>
 
-              <TabsContent value="rejected" className="space-y-4 mt-6">
+              <TabsContent value="rejected" className="mt-6 max-h-[400px] overflow-y-auto">
                 {rejectedEnvelopes.length === 0 ? (
                   <div className="text-center py-8">
                     <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
                     <p className="text-muted-foreground">No rejected workflows - Great job!</p>
                   </div>
                 ) : (
-                  <div className="grid gap-4">
+                  <div className="grid gap-4 pr-2">
                     {rejectedEnvelopes.map((envelope) => (
                       <EnhancedWorkflowProgressCard 
                         key={envelope.id} 

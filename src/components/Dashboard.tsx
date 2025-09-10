@@ -144,14 +144,14 @@ export function Dashboard({ onCompose, onNavigate, currentSection, envelopes, on
   };
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="h-screen flex w-full bg-background overflow-hidden">
         <SidebarComponent 
           onNavigate={onNavigate}
           currentSection={currentSection}
         />
 
-        <main className="flex-1 flex flex-col">
-          <header className="h-16 border-b border-border flex items-center justify-between px-6">
+        <main className="flex-1 flex flex-col h-screen overflow-hidden">
+          <header className="h-16 border-b border-border flex items-center justify-between px-6 flex-shrink-0">
             <div className="flex items-center">
               <SidebarTrigger className="mr-4" />
               <div className="flex flex-col">
@@ -182,7 +182,7 @@ export function Dashboard({ onCompose, onNavigate, currentSection, envelopes, on
             </div>
           </header>
 
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-6 overflow-y-auto">
             <QuickActionsBar
               onNewEnvelope={onCompose}
               onStartChat={handleStartChat}
