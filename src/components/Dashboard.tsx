@@ -193,7 +193,11 @@ export function Dashboard({ onCompose, onNavigate, currentSection, envelopes, on
               currentSection={currentSection}
             />
 
-            {children ? children : currentSection === "dashboard" ? (
+            {children ? (
+              <div className="h-full overflow-y-auto">
+                {children}
+              </div>
+            ) : currentSection === "dashboard" ? (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
