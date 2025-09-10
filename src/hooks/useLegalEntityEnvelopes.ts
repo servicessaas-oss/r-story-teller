@@ -1,10 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCallback } from "react";
 
 export const useLegalEntityEnvelopes = () => {
   const { user, profile } = useAuth();
 
-  const getAssignedEnvelopes = async () => {
+  const getAssignedEnvelopes = useCallback(async () => {
     console.log('🔍 getAssignedEnvelopes called with:', { user: user?.email, profile: profile?.role, legal_entity_id: profile?.legal_entity_id });
     
     if (!user || !profile || profile.role !== 'legal_entity') {
@@ -69,9 +70,9 @@ export const useLegalEntityEnvelopes = () => {
         document_types: files.map((file: any) => file.type).filter(Boolean) || []
       };
     }).filter(Boolean) || [];
-  };
+  }, [user, profile]);
 
-  const updateEnvelopeVerification = async (envelopeId: string, status: string, notes?: string) => {
+  const updateEnvelopeVerification = useCallback(async (envelopeId: string, status: string, notes?: string) => {
     const { data, error } = await supabase
       .from('envelopes')
       .update({ 
@@ -102,9 +103,9 @@ export const useLegalEntityEnvelopes = () => {
     }
 
     return data;
-  };
+  }, [profile]);
 
-  const getWorkloadStats = async () => {
+  const getWorkloadStats = useCallback(async () => {
     if (!user || !profile || profile.role !== 'legal_entity') {
       throw new Error("Not authorized to access legal entity stats");
     }
@@ -114,7 +115,7 @@ export const useLegalEntityEnvelopes = () => {
 
     if (error) throw error;
     return data?.[0] || { total_pending: 0, total_in_review: 0, total_completed: 0, total_overdue: 0 };
-  };
+  }, [user, profile]);
 
   return {
     getAssignedEnvelopes,
