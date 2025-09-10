@@ -38,7 +38,7 @@ export function LegalEntityDashboard({
   const completionRate = totalDocuments > 0 ? Math.round(((stats.approved + stats.rejected) / totalDocuments) * 100) : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-h-screen overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
