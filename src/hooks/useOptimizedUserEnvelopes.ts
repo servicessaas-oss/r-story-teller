@@ -24,18 +24,13 @@ export const useOptimizedUserEnvelopes = () => {
   const [envelopes, setEnvelopes] = useState<UserEnvelope[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastFetch, setLastFetch] = useState<number>(0);
 
   // Debounced fetch function to prevent excessive API calls
   const fetchEnvelopes = useCallback(async () => {
     if (!user) return;
 
-    const now = Date.now();
-    if (now - lastFetch < 1000) return; // Prevent calls within 1 second
-
     setLoading(true);
     setError(null);
-    setLastFetch(now);
 
     try {
       const { data, error: fetchError } = await supabase
@@ -69,7 +64,7 @@ export const useOptimizedUserEnvelopes = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, lastFetch]);
+  }, [user]);
 
   // Memoized computed values to avoid recalculation on every render
   const { activeEnvelopes, completedEnvelopes } = useMemo(() => {
@@ -125,7 +120,7 @@ export const useOptimizedUserEnvelopes = () => {
       if (timeoutId) clearTimeout(timeoutId);
       supabase.removeChannel(channel);
     };
-  }, [user?.id]);
+  }, [user?.id, fetchEnvelopes]);
 
   const getActiveWorkflows = useCallback(() => activeEnvelopes, [activeEnvelopes]);
   const getCompletedWorkflows = useCallback(() => completedEnvelopes, [completedEnvelopes]);

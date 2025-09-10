@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth, AuthProvider } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { AuthPageWithPlatform } from "@/components/AuthPageWithPlatform";
 import { LegalEntityPlatform } from "@/components/LegalEntityPlatform";
 import { WorldClock } from "@/components/WorldClock";
@@ -8,14 +8,10 @@ import { Button } from "@/components/ui/button";
 import PrimesayCargo from "./PrimesayCargo";
 
 function IndexInner() {
-  console.log('🏠 IndexInner rendering...');
-  
   const { user, profile, loading, signOut } = useAuth();
   const [selectedPlatform, setSelectedPlatform] = useState<'user' | 'legal_entity'>('user');
   const [showAdminSetup, setShowAdminSetup] = useState(false);
   const isLegalEntity = profile?.role === 'legal_entity' || (user?.user_metadata?.role === 'legal_entity');
-  
-  console.log('👤 Auth state:', { user: !!user, profile: !!profile, loading, isLegalEntity });
 
   if (loading) {
     return (
